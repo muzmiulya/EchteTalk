@@ -78,7 +78,6 @@
           <div class="buttonBack">
             <b-button
               v-b-tooltip.hover.top="'Back'"
-              v-show="!isSuccess"
               @click="isShown = !isShown"
               class="flex-fill backButton"
             >
@@ -89,7 +88,7 @@
             <h3 class="titleColor">Register</h3>
           </div>
         </b-row>
-        <form v-show="!isSuccess">
+        <form>
           <br />
           <div class="d-flex">
             <h6 style="font-weight: normal">Email</h6>
@@ -157,7 +156,6 @@
           <div class="buttonBack">
             <b-button
               v-b-tooltip.hover.top="'Back'"
-              v-show="!isSuccess"
               @click="isShown = !isShown"
               class="flex-fill backButton"
             >
@@ -318,10 +316,17 @@ export default {
   border-right: none !important;
 }
 .backButton {
-  max-width: 100%;
+  max-width: 50px;
+  width: 100%;
   height: auto;
   background-color: transparent;
   border: none;
+}
+
+.backButton img {
+  max-width: 50px;
+  width: 100%;
+  height: auto;
 }
 .buttonBack {
   max-width: 100%;

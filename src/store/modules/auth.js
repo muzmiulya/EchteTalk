@@ -6,7 +6,7 @@ export default {
   state: {
     user: {},
     token: localStorage.getItem('token') || null,
-    users: [],
+    // users: [],
     pagess: 1,
     perPages: 7,
     totallRows: null,
@@ -21,9 +21,9 @@ export default {
       state.user = {}
       state.token = null
     },
-    setAllUser(state, payload) {
-      state.users = payload
-    },
+    // setAllUser(state, payload) {
+    //   state.users = payload
+    // },
     setPagess(state, payload) {
       state.pagess = payload
     },
@@ -81,6 +81,21 @@ export default {
       return new Promise((resolve, reject) => {
         axios
           .post(`${process.env.VUE_APP_BASE_URL}/users/forgot`, payload)
+          .then(response => {
+            resolve(response.data)
+          })
+          .catch(error => {
+            reject(error.response)
+          })
+      })
+    },
+    changePassword(context, payload) {
+      return new Promise((resolve, reject) => {
+        axios
+          .patch(
+            `${process.env.VUE_APP_BASE_URL}/users/change?keys=${payload.keys}`,
+            payload.form
+          )
           .then(response => {
             resolve(response.data)
           })
@@ -182,9 +197,9 @@ export default {
     setUser(state) {
       return state.user
     },
-    getUsers(state) {
-      return state.users
-    },
+    // getUsers(state) {
+    //   return state.users
+    // },
     getRowses(state) {
       return state.totallRows
     },
