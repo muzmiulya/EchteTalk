@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <b-row>
+    <b-row class="d-flex justify-content-center">
       <b-col md="6" sm="6" class="content-right">
         <b-container>
           <b-row>
@@ -102,7 +102,7 @@ export default {
 .login-container {
   background-color: #f6f7f8;
   padding: 40px 75px;
-  height: 100vh;
+  height: 600px;
 }
 
 .login-container .content-right {

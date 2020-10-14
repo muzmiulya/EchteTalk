@@ -8,7 +8,7 @@
     hide-footer
     @close="closeModal()"
   >
-    <form ref="form">
+    <form ref="form" @submit.prevent="showModal = false">
       <b-form-group
         label="Email"
         label-for="email-input"
@@ -26,14 +26,24 @@
     <b-row>
       <b-col xl="4" v-for="(item, index) in users" :key="index">
         <b-card class="jpeg">
-          <b-img style="max-width: 100%" :src="require('../assets/rose.png')">
+          <b-img style="max-width: 100%" :src="urlApi + item.profile_picture">
           </b-img>
           <h6>{{ item.user_email }}</h6>
           <p>{{ item.user_name }}</p>
           <p>{{ item.user_phone }}</p>
-          <b-button @click="addFriendss(item)" variant="primary"
+          <b-button
+            :disabled="isDisabled(item)"
+            @click="addFriendss(item)"
+            variant="primary"
             >Add Friend</b-button
           >
+          <!-- <b-button v-show="isDisabled(item)" variant="primary" disabled>
+            <b-img
+              style="max-width: 20px"
+              :src="require('../assets/check.png')"
+            >
+            </b-img>
+          </b-button> -->
         </b-card>
       </b-col>
     </b-row>
@@ -46,10 +56,12 @@ export default {
   name: 'AddFriends',
   data() {
     return {
+      urlApi: process.env.VUE_APP_BASE_URL + '/',
       searching: '',
       form: {
         user_email: ''
       }
+      // isDisabled: false
     }
   },
   //   created() {
@@ -58,7 +70,9 @@ export default {
   computed: {
     ...mapGetters({
       user: 'setUser',
-      users: 'getUsers'
+      users: 'getUsers',
+      friend: 'getFriend',
+      email: 'getEmail'
     })
   },
   methods: {
@@ -69,9 +83,26 @@ export default {
       this.users.length = 0
       this.form.user_email = ''
     },
+    isDisabled(item, index) {
+      if (this.friend) {
+        for (let x in this.friend) {
+          if (this.friend[x].user_email === item.user_email) {
+            return true
+          }
+        }
+      } else {
+        return false
+      }
+    },
     handleSearch(event) {
       this.setSearch(event)
       this.inviteFriends()
+        .then((response) => {
+          console.log(response)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
     addFriendss(data) {
       const setData = {
@@ -80,8 +111,7 @@ export default {
       }
       this.add(setData)
         .then((response) => {
-          console.log(response)
-          //   this.getRoom(setData.user_id)
+          this.handleSearch(this.email)
         })
         .catch((error) => {
           console.log(error)

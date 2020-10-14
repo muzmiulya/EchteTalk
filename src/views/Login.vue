@@ -8,7 +8,10 @@
     />
     <div class="d-flex justify-content-center h-100">
       <b-card v-show="!isShown">
-        <b-alert v-bind:show="alert">{{ isMsg }}</b-alert>
+        <b-alert variant="success" v-bind:show="alert">{{ isMsg }}</b-alert>
+        <b-alert variant="danger" v-bind:show="alertError">{{
+          msgError
+        }}</b-alert>
         <h3 class="titleColor">Login</h3>
         <br />
         <div class="d-flex">
@@ -39,7 +42,14 @@
           ></b-form-input>
           <br />
           <b-row>
-            <b-link
+            <router-link
+              class="d-flex justify-content-end buttonLogSign btn-block"
+              style="padding-right: 20px"
+              to="/reset"
+            >
+              <p>Forgot password?</p>
+            </router-link>
+            <!-- <b-link
               class="d-flex justify-content-end buttonLogSign btn-block"
               variant="light"
               type="button"
@@ -47,7 +57,7 @@
               style="padding-right: 15px"
             >
               Forgot password?
-            </b-link>
+            </b-link> -->
           </b-row>
           <br />
           <b-button
@@ -70,15 +80,15 @@
         >
       </b-card>
       <b-card class="align-content-center" v-show="isShown">
-        <b-alert v-bind:show="alert">{{ isMsg }}</b-alert>
-        <b-alert show variant="success" v-show="isSuccess"
-          >Activation link has been sent to your email.</b-alert
-        >
+        <b-alert variant="success" v-bind:show="alert">{{ isMsg }}</b-alert>
+        <b-alert variant="danger" v-bind:show="alertError">{{
+          msgError
+        }}</b-alert>
         <b-row class="d-flex">
           <div class="buttonBack">
             <b-button
               v-b-tooltip.hover.top="'Back'"
-              @click="isShown = !isShown"
+              @click=";(isShown = !isShown), onResetSignUp()"
               class="flex-fill backButton"
             >
               <img alt="Vue back" src="../assets/back.png" />
@@ -150,7 +160,7 @@
           >
         </form>
       </b-card>
-      <b-card class="align-content-center" v-show="isShown">
+      <!-- <b-card class="align-content-center" v-show="isShown">
         <b-alert v-bind:show="alert">{{ isMsg }}</b-alert>
         <b-row class="d-flex">
           <div class="buttonBack">
@@ -194,7 +204,7 @@
             >Send</b-button
           >
         </form>
-      </b-card>
+      </b-card> -->
     </div>
   </b-container>
 </template>
@@ -216,14 +226,12 @@ export default {
         user_name: '',
         user_phone: ''
       },
-      formForgot: {
-        user_email: ''
-      },
       isShown: false,
       showForgot: false,
-      isSuccess: false,
       alert: false,
-      isMsg: ''
+      isMsg: '',
+      alertError: false,
+      msgError: ''
     }
   },
   computed: {
@@ -238,9 +246,6 @@ export default {
     },
     isDisabled2() {
       return this.form.user_email <= 0 || this.form.user_password <= 0
-    },
-    isDisabled3() {
-      return this.formForgot.user_email <= 0
     }
   },
   methods: {
@@ -252,8 +257,8 @@ export default {
           this.$router.push('/')
         })
         .catch((error) => {
-          this.alert = true
-          this.isMsg = error
+          this.alertError = true
+          this.msgError = error
         })
     },
     onReset() {
@@ -262,46 +267,28 @@ export default {
         user_password: ''
       }
       this.alert = false
+      this.alertError = false
     },
     onResetSignUp() {
       this.formSignUp = {
         user_email: '',
         user_password: '',
-        user_name: ''
+        confirm_password: '',
+        user_name: '',
+        user_phone: ''
       }
       this.alert = false
+      this.alertError = false
     },
     addUser() {
       this.addUsers(this.formSignUp)
         .then((response) => {
-          const activate = {
-            user_email: this.formSignUp.user_email
-          }
-          this.activateEmail(activate)
-            .then((result) => {
-              this.alert = false
-              this.isSuccess = true
-            })
-            .catch((error) => {
-              this.alert = true
-              this.isMsg = error.data.msg
-            })
-        })
-        .catch((error) => {
-          this.alert = true
-          this.isMsg = error.data.msg
-        })
-    },
-    onForgot() {
-      this.forgot(this.formForgot)
-        .then((response) => {
-          this.isShown = false
           this.alert = true
           this.isMsg = response.msg
         })
         .catch((error) => {
-          this.alert = true
-          this.isMsg = error.data.msg
+          this.alertError = true
+          this.msgError = error.data.msg
         })
     }
   }
@@ -316,7 +303,7 @@ export default {
   border-right: none !important;
 }
 .backButton {
-  max-width: 50px;
+  max-width: 40px;
   width: 100%;
   height: auto;
   background-color: transparent;

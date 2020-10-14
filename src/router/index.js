@@ -16,6 +16,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/reset',
+    name: 'Reset',
+    component: () => import('../views/Reset.vue'),
+    meta: { requiresVisitor: true }
+  },
+  {
     path: '/setpassword',
     name: 'Set',
     component: () => import('../views/Set.vue'),
