@@ -37,10 +37,9 @@ export default {
         axios
           .post(`${process.env.VUE_APP_BASE_URL}/users/login`, payload)
           .then(response => {
-            console.log(response.data.data)
             context.commit('setUser', response.data.data)
             localStorage.setItem('token', response.data.data.token)
-            resolve(response.data.msg)
+            resolve(response.data.data)
           })
           .catch(error => {
             reject(error.response.data.msg)
@@ -57,18 +56,6 @@ export default {
       return new Promise((resolve, reject) => {
         axios
           .post(`${process.env.VUE_APP_BASE_URL}/users/register`, payload)
-          .then(response => {
-            resolve(response.data)
-          })
-          .catch(error => {
-            reject(error.response)
-          })
-      })
-    },
-    activateEmail(context, payload) {
-      return new Promise((resolve, reject) => {
-        axios
-          .post(`${process.env.VUE_APP_BASE_URL}/users/register/email`, payload)
           .then(response => {
             resolve(response.data)
           })
@@ -111,28 +98,39 @@ export default {
           context.commit('setAllUser', response.data.data)
           const totallRows = response.data.data.length
           context.commit('setTotallRows', totallRows)
-          // this.users = response.data.data
-          // this.totalRows = response.data.data.length
-          // this.getIncomeToday()
-          // console.log(this.todayIncome)
         })
         .catch(error => {
           console.log(error)
         })
     },
-    updateUser(context, payload) {
+    // updateUser(context, payload) {
+    //   return new Promise((resolve, reject) => {
+    //     axios
+    //       .patch(
+    //         `${process.env.VUE_APP_BASE_URL}/users/patch/${payload.user_id}`,
+    //         payload
+    //       )
+    //       .then(response => {
+    //         console.log(response)
+    //         resolve(response.data)
+    //       })
+    //       .catch(error => {
+    //         reject(error.response)
+    //       })
+    //   })
+    // },
+    updateLocation(context, payload) {
       return new Promise((resolve, reject) => {
         axios
           .patch(
-            `${process.env.VUE_APP_BASE_URL}/users/patch/${payload.user_id}`,
+            `${process.env.VUE_APP_BASE_URL}/users/patch/location/${payload.user_id}`,
             payload.form
           )
           .then(response => {
-            console.log(response)
-            resolve(response.data)
+            resolve(response.data.msg)
           })
           .catch(error => {
-            reject(error.response)
+            reject(error.response.data.msg)
           })
       })
     },

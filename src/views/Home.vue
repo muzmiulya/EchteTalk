@@ -8,10 +8,12 @@
         crossorigin="anonymous"
       />
       <b-row>
-        <b-col xl="3">
+        <b-col xl="3" lg="3" md="3" class="borderRight">
           <b-container v-if="!shown" class="listPage">
             <b-row class="d-flex justify-content-between">
-              <h3 class="listTitle">EchteTalk</h3>
+              <div style="margin: 0">
+                <h3 class="listTitle">EchteTalk</h3>
+              </div>
               <div>
                 <b-button id="popoverMenu" class="flex-fill listButton">
                   <img alt="Vue back" src="../assets/Menu.png" />
@@ -22,14 +24,17 @@
                   :show.sync="show"
                   triggers="click"
                   class="popoverB"
-                  variant="info"
+                  variant="primary"
                 >
                   <div
                     class="d-flex flex-column justify-content-start popovers"
+                    style="backgound-color: blue"
                   >
                     <b-button
                       variant="primary"
-                      @click=";(shown = true), handleMyProfile()"
+                      @click="
+                        ;(shown = true), (show = false), handleMyProfile()
+                      "
                     >
                       <img alt="Vue setting" src="../assets/Settings.png" />
                       Setting</b-button
@@ -37,13 +42,13 @@
                     <b-button
                       ref="btnShow"
                       variant="primary"
-                      @click="onClose()"
+                      @click="onClose(), handleGetFriend()"
                     >
                       <img alt="Vue contact" src="../assets/contacts.png" />
                       Contacts</b-button
                     >
                     <b-button
-                      @click="closeInvite()"
+                      @click="closeInvite(), handleGetFriend()"
                       variant="primary"
                       ref="btnShows"
                     >
@@ -73,7 +78,7 @@
                 no-close-on-esc
                 hide-footer
               >
-                <b-row>
+                <b-row v-if="contactExist">
                   <b-col xl="3" v-for="(item, index) in friend" :key="index">
                     <b-card class="text">
                       <b-img
@@ -84,12 +89,53 @@
                       <h6>{{ item.user_email }}</h6>
                       <p>{{ item.user_name }}</p>
                       <p>{{ item.user_phone }}</p>
-                      <b-button @click="makeRoomchat(item)" variant="primary"
+                      <b-button
+                        v-if="!inChat(item)"
+                        @click="makeRoomchat(item)"
+                        variant="primary"
                         >Chat</b-button
+                      >
+                      <b-button
+                        v-if="inChat(item)"
+                        @click="setDelete(item)"
+                        variant="danger"
+                        v-b-modal.modal-delete
+                        >Delete Contact</b-button
                       >
                     </b-card>
                   </b-col>
                 </b-row>
+                <b-row v-else class="d-flex justify-content-center">
+                  <h5>Please Add Contact</h5>
+                </b-row>
+              </b-modal>
+              <b-modal
+                id="modal-delete"
+                hide-header
+                hide-footer
+                no-close-on-backdrop
+                no-close-on-esc
+              >
+                <b-container class="modaldelete">
+                  <div class="youSure">
+                    <h3>Are You Sure?</h3>
+                  </div>
+                  <br />
+                  <b-button
+                    class="buttonCancelDel"
+                    pill
+                    variant="warning"
+                    @click="$bvModal.hide('modal-delete')"
+                    >Cancel</b-button
+                  >
+                  <b-button
+                    class="buttonYesDel"
+                    pill
+                    variant="danger"
+                    @click="handleDelete(), $bvModal.hide('modal-delete')"
+                    >Yes</b-button
+                  >
+                </b-container>
               </b-modal>
             </b-row>
             <b-row
@@ -106,9 +152,34 @@
                   placeholder="Type your message..."
                 ></b-form-input>
               </b-input-group>
-              <b-button class="d-flex justify-content-end addButton">
-                <img alt="Vue back" src="../assets/add.png" />
-              </b-button>
+              <div class="d-flex justify-content-end bellButton">
+                <b-button
+                  id="popoverNotif"
+                  class="addButton"
+                  @click="handleNotif()"
+                >
+                  <img alt="Vue back" src="../assets/notification.png" />
+                </b-button>
+                <b-popover
+                  target="popoverNotif"
+                  :placement="placements"
+                  :show.sync="showns"
+                  triggers="click"
+                  class="popoverB"
+                >
+                  <b-container style="max-height: 250px; overflow-y: scroll">
+                    <b-card
+                      v-for="(item, index) in notification"
+                      :key="index"
+                      style="height: 50px; width: 200px"
+                    >
+                      <div class="notif">
+                        <p>{{ item.user_name }}: {{ item.notif }}</p>
+                      </div>
+                    </b-card>
+                  </b-container>
+                </b-popover>
+              </div>
             </b-row>
             <b-row
               class="searchAndAdd d-flex justify-content-between align-content-center"
@@ -117,58 +188,60 @@
                 All
               </b-button>
               <b-button class="buttonMiddle" variant="outline-info">
-                Important
+                Read
               </b-button>
               <b-button class="buttonMiddle" variant="outline-info">
                 Unread
               </b-button>
             </b-row>
             <b-row style="height: 600px; overflow: auto">
-              <b-card v-for="(item, index) in roomchat" :key="index">
-                <div class="gridbox">
-                  <div class="friends">
-                    <div class="item-a">
-                      <b-link type="button" @click="getRoomChat(item)">
-                        <b-img
-                          alt="Vue pictures"
-                          :src="urlApi + item.profile_picture"
-                        />
-                      </b-link>
-                    </div>
-                    <div class="item-b">
-                      <b-link
-                        style="color: black"
-                        class="buttonLogSign"
-                        variant="light"
-                        type="button"
-                        @click="setFriendUsers(item)"
-                        v-b-toggle.sidebar-right
-                        >{{ item.user_name }}</b-link
+              <b-container class="d-flex align-items-start flex-column">
+                <b-card
+                  v-for="(item, index) in roomchat"
+                  :key="index"
+                  style="height: 110px; width: 100%"
+                >
+                  <div class="gridbox">
+                    <div class="friends">
+                      <div class="item-a">
+                        <b-link
+                          type="button"
+                          @click="getRoomChat(item), getMessageByRoom(item)"
+                        >
+                          <b-img
+                            alt="Vue pictures"
+                            :src="urlApi + item.profile_picture"
+                          />
+                        </b-link>
+                      </div>
+                      <div class="item-b">
+                        <p style="color: black; font-weight: bold">
+                          {{ item.user_name }}
+                        </p>
+                      </div>
+                      <div class="item-d">
+                        <p>{{ item.messageDate }}</p>
+                      </div>
+                      <div class="item-e">
+                        <p>{{ item.latestMessage }}</p>
+                      </div>
+                      <div
+                        class="d-flex align-self-center justify-content-center item-f"
                       >
-                      <!-- <p>{{ item.user_name }}</p> -->
-                    </div>
-                    <div class="item-d">
-                      <p>15:20</p>
-                    </div>
-                    <div class="item-e">
-                      <p>Why did you do that?</p>
-                    </div>
-                    <div
-                      class="d-flex align-self-center justify-content-center item-f"
-                    >
-                      <span class="badge badge-pill badge-primary">1</span>
+                        <!-- <span class="badge badge-pill badge-primary">1</span> -->
+                      </div>
                     </div>
                   </div>
-                </div>
-              </b-card>
+                </b-card>
+              </b-container>
             </b-row>
           </b-container>
+
           <b-container class="listPage" v-else>
             <Profile @showns="shows"></Profile>
           </b-container>
-          <ProfileFriend :form2="form2"></ProfileFriend>
         </b-col>
-        <Chat :myInfo="myInfo" :startChat="startChat"></Chat>
+        <Chat ref="selection" :myInfo="myInfo" :startChat="startChat"></Chat>
       </b-row>
     </b-container>
   </div>
@@ -179,7 +252,6 @@ import { mapActions, mapGetters } from 'vuex'
 import AddFriends from '../components/AddFriends'
 import Chat from '../components/Chat'
 import Profile from '../components/Profile'
-import ProfileFriend from '../components/ProfileFriend'
 export default {
   name: 'Home',
   data() {
@@ -187,6 +259,7 @@ export default {
       urlApi: process.env.VUE_APP_BASE_URL + '/',
       show: false,
       shown: false,
+      showns: false,
       placements: 'bottomleft',
       alert: false,
       msg: '',
@@ -203,40 +276,46 @@ export default {
       },
       startChat: false,
       myInfo: {},
-      bodyBgVariant: 'light'
+      bodyBgVariant: 'light',
+      forms: {
+        user_id: 0,
+        friend_id: 0
+      }
     }
   },
   components: {
     AddFriends,
     Chat,
-    Profile,
-    ProfileFriend
+    Profile
   },
 
   mounted() {
-    // this.handleGetRoomUser()
-    this.handleGetFriend()
     this.handleRoomChat()
-    // this.handleMyProfile()
   },
   computed: {
     ...mapGetters({
       user: 'setUser',
-      // friend: 'getFriend',
       friend: 'getFriend',
       otherUser: 'getOtherUser',
-      roomchat: 'getRoomchat'
-    })
+      roomchat: 'getRoomchat',
+      notification: 'getNotif'
+    }),
+    contactExist() {
+      return this.friend.length > 0
+    }
   },
   methods: {
     ...mapActions({ handleLogout: 'logout' }),
     ...mapActions([
-      // 'getRoom',
       'getFriends',
       'getUserById',
       'getMessageByRoom',
       'postRoom',
-      'getAllRoomChat'
+      'getAllRoomChat',
+      'getNotification',
+      'getRoomchatForDelete',
+      'deleteContact',
+      'deleteRoomchat'
     ]),
     onClose() {
       this.$root.$emit('bv::show::modal', 'modalContact', '#btnShow')
@@ -249,6 +328,17 @@ export default {
     shows() {
       this.shown = false
     },
+    inChat(item) {
+      if (this.roomchat) {
+        for (let x in this.roomchat) {
+          if (this.roomchat[x].user_email === item.user_email) {
+            return true
+          }
+        }
+      } else {
+        return false
+      }
+    },
     makeRoomchat(item) {
       const setData = {
         user_id: this.user.user_id,
@@ -256,7 +346,7 @@ export default {
       }
       this.postRoom(setData)
         .then((response) => {
-          console.log(response)
+          this.handleRoomChat()
         })
         .catch((error) => {
           console.log(error)
@@ -277,18 +367,9 @@ export default {
         user_name: item.user_name,
         user_phone: item.user_phone
       }
-      console.log(this.myInfo)
-      // this.getMessageByRoom(item.roomchat_id)
+      const select = this.$refs.selection
+      select.selectRoom(item)
     },
-    // handleGetRoomUser(event) {
-    //   this.getRoom(this.user)
-    //     .then((response) => {
-    //       // console.log(response)
-    //     })
-    //     .catch((error) => {
-    //       console.log(error)
-    //     })
-    // },
     handleGetFriend() {
       this.getFriends(this.user)
         .then((response) => {
@@ -307,18 +388,42 @@ export default {
           console.log(error.data.msg)
         })
     },
-    setFriendUsers(data) {
-      this.form2 = {
-        friend_id: data.friend_id,
-        friend_email: data.user_email,
-        friend_name: data.user_name,
-        friend_phone: data.user_phone,
-        friend_bio: data.profile_bio,
-        friend_picture: data.profile_picture,
-        friend_lat: data.user_lat,
-        friend_lng: data.user_lng
+    handleNotif() {
+      this.getNotification(this.user)
+    },
+    setDelete(item) {
+      this.forms = {
+        user_id: item.user_id,
+        friend_id: item.friend_id
       }
-      console.log(this.form2)
+      this.id_friend = item.id_friend
+    },
+    handleDelete() {
+      const setData = {
+        id_friend: this.id_friend,
+        user_id: this.forms.user_id,
+        friend_id: this.forms.friend_id
+      }
+      this.getRoomchatForDelete(setData)
+        .then((response) => {
+          this.deleteRoomchat(response.data[0])
+            .then((response) => {
+              this.deleteContact(setData)
+                .then((response) => {
+                  this.handleGetFriend()
+                  this.handleRoomChat()
+                })
+                .catch((error) => {
+                  console.log(error)
+                })
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     }
   }
 }
@@ -351,6 +456,15 @@ export default {
   color: black !important;
   border-color: transparent !important;
 }
+.borderRight {
+  border-right: 3px whitesmoke outset;
+}
+.buttonCancelDel {
+  grid-area: cancel;
+}
+.buttonYesDel {
+  grid-area: yes;
+}
 .card-body {
   background: transparent;
 }
@@ -368,6 +482,65 @@ export default {
   height: auto;
 }
 
+.friends {
+  display: grid;
+  max-width: 100%;
+  height: 80px;
+  grid-template-rows: 50% 50%;
+  grid-template-columns: 25% 5% 40% 5% 25%;
+  grid-template-areas:
+    'itema . itemb . itemd'
+    'itema . iteme . itemf';
+}
+
+.item-a {
+  max-width: 100%;
+  height: auto;
+  grid-area: itema;
+}
+.item-a a img {
+  object-fit: cover;
+  border-radius: 5px 5px 5px 5px;
+  width: 60px;
+  max-width: 100%;
+  height: auto;
+}
+.item-b {
+  font-size: 15px;
+  grid-area: itemb;
+}
+
+.item-b p {
+  width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.item-d {
+  grid-area: itemd;
+  font-size: 15px;
+}
+
+.item-d p {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.item-e {
+  font-size: 15px;
+  grid-area: iteme;
+}
+
+.item-e p {
+  width: 100%;
+  height: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.item-f {
+  grid-area: itemf;
+}
 .listButton {
   max-width: 50px;
   background: transparent;
@@ -386,62 +559,66 @@ export default {
 .listTitle {
   color: #7e98df;
 }
+.notif p {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.modaldelete {
+  display: grid;
+  grid-template-rows: 50% 50%;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    'yousure yousure yousure'
+    'cancel . yes';
+}
+
+.popover-body {
+  color: #7e98df !important;
+}
+.popovers button img {
+  width: 20px;
+  max-width: 100%;
+}
 
 .searchAndAdd {
   height: 70px;
 }
 .searchMessage {
   max-width: 100%;
-  width: 250px;
+  width: auto;
   height: 40px;
 }
-
-.friends {
-  display: grid;
-  max-width: 100%;
-  height: 80px;
-  grid-template-rows: 50% 50%;
-  grid-template-columns: 25% 5% 20% 20% 10% 5%;
-  grid-template-areas:
-    'itema . itemb itemb itemb . itemd'
-    'itema . iteme iteme iteme . itemf';
+.youSure {
+  text-align: center;
+  grid-area: yousure;
 }
 
-.item-a {
-  max-width: 100%;
-  height: auto;
-  grid-area: itema;
+@media screen and (max-width: 1280px) {
+  .searchMessage {
+    width: 200px;
+    height: 30px;
+  }
 }
-.item-a img {
-  object-fit: cover;
-  border-radius: 5px 5px 5px 5px;
-  width: 100%;
-  height: 100%;
-}
-.item-b {
-  font-size: 15px;
-  grid-area: itemb;
-}
-/* .item-c {
-  grid-area: itemc;
-}
-.item-c img {
-  max-width: 100%;
-  height: auto;
-} */
-.item-d {
-  grid-area: itemd;
-}
-.item-e {
-  font-size: 15px;
-  grid-area: iteme;
-}
-.item-f {
-  grid-area: itemf;
+@media screen and (max-width: 1180px) {
+  .searchMessage {
+    width: 150px;
+  }
 }
 
-.popovers button img {
-  width: 20px;
-  max-width: 100%;
+@media screen and (max-width: 900px) {
+  .searchMessage {
+    width: 120px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .borderRight {
+    border-right: none;
+    border-bottom: 3px whitesmoke outset;
+  }
+  .searchMessage {
+    width: 75%;
+  }
 }
 </style>

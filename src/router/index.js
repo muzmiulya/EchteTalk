@@ -1,9 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import store from '../store/index'
-// import About from '../views/About.vue'
 import Home from '../views/Home.vue'
-// import Chat from '../views/Chat.vue'
 import Login from '../views/Login.vue'
 
 Vue.use(VueRouter)
@@ -27,18 +25,6 @@ const routes = [
     component: () => import('../views/Set.vue'),
     meta: { requiresVisitor: true }
   },
-  // {
-  //   path: '/about',
-  //   name: 'About',
-  //   component: About,
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/chat',
-  //   name: 'Chat',
-  //   component: Chat,
-  //   meta: { requiresAuth: true }
-  // },
   {
     path: '/login',
     name: 'Login',

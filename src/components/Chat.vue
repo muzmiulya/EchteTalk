@@ -1,80 +1,93 @@
 <template>
-  <b-col xl="9" class="chatPage" v-if="startChat">
-    <b-row style="padding: 10px; background: white">
+  <b-col xl="9" lg="9" md="9" class="chatPage" v-if="startChat">
+    <b-row
+      class="d-flex justify-content-between"
+      style="padding: 10px; background: white"
+    >
       <div class="friendChat">
         <div class="itemA">
           <img alt="Vue pictures" :src="urlApi + myInfo.profile_picture" />
         </div>
-        <div class="itemB">
+        <div class="itemB" style="font-weight: bold">
           <p>{{ myInfo.user_name }}</p>
         </div>
         <div class="itemC">
-          <p>Online</p>
+          <p style="font-weight: bold; color: blue">Online</p>
         </div>
       </div>
+      <div class="d-flex align-items-center itemD">
+        <b-button
+          v-b-toggle.sidebar-right
+          @click="profileFriend(myInfo.friend_id)"
+        >
+          <img alt="Vue pictures" src="../assets/profilemenu.png" />
+        </b-button>
+      </div>
     </b-row>
-    <b-row class="d-flex flex-column" style="padding: 10px; height: 600px">
-      <p v-if="typing">
+    <ProfileFriend></ProfileFriend>
+    <b-row
+      class="d-flex flex-column"
+      style="padding: 10px; height: 600px; overflow: scroll"
+    >
+      <b-container style="width: 100%">
+        <!-- <p v-if="typing">
         <em>{{ typing }} is typing a message...</em>
-      </p>
-      <!-- <p v-for="(value, index) in messages" :key="index">
-        <strong>{{ value.username }} :</strong>
-        {{ value.message }}
       </p> -->
-      <!-- <b-card class="text" > -->
-      <b-row
-        v-for="(value, index) in messages"
-        :key="index"
-        style="margin-bottom: 10px; height: auto"
-      >
-        <b-col xl="2" class="d-flex">
-          <!-- <b-img rounded="circle" :src="require('../assets/rose.png')">
-            </b-img> -->
-          <p>
+        <b-row
+          v-for="(value, index) in messageInRoomchat"
+          :key="index"
+          style="margin-bottom: 10px; height: auto"
+        >
+          <b-container v-if="value.user_id === user.user_id">
+            <!-- <b-col xl="2" class="d-flex">
+              <p>
             <strong>{{ value.username }}:</strong>
           </p>
-        </b-col>
-        <b-col class="d-flex align-content-center message" xl="5">
-          <p style="width: 500px">{{ value.message }}</p>
-        </b-col>
-      </b-row>
-      <!-- </b-card> -->
-      <!-- <b-card class="text">
-        <b-row>
-          <b-col xl="2" class="d-flex align-self-end textIn">
-            <b-img rounded="circle" :src="require('../assets/rose.png')">
-            </b-img>
-          </b-col>
-          <b-col class="message" xl="5">
-            <p>Hi, Son how are you doing?</p>
-          </b-col>
+            </b-col> -->
+            <b-col
+              class="d-flex align-content-center message"
+              xl="5"
+              lg="5"
+              md="5"
+              sm="5"
+            >
+              <p>{{ value.msg }}</p>
+            </b-col>
+          </b-container>
+          <b-container v-else class="d-flex justify-content-end">
+            <b-col xl="2">
+              <!-- <p>
+            <strong>{{ value.username }}:</strong>
+          </p> -->
+            </b-col>
+            <b-col
+              class="d-flex align-content-center friendMessage"
+              xl="5"
+              lg="5"
+              md="5"
+              sm="5"
+            >
+              <p>{{ value.msg }}</p>
+            </b-col>
+          </b-container>
         </b-row>
-      </b-card> -->
+      </b-container>
     </b-row>
-    <b-row class="d-flex">
-      <b-form-input
-        style="width: 90%"
-        type="text"
-        v-model="message"
-        placeholder="Type your message..."
-      ></b-form-input>
-      <b-button
-        style="width: 10%"
-        @click="sendMessage"
-        class="send"
-        variant="primary"
-        >Send</b-button
-      >
-      <!-- <input
-        class="message"
-        type="text"
-        v-model="message"
-        placeholder="Message"
-      />
-      <button class="send" @click="sendMessage">Send</button> -->
+    <b-row style="background: white; height: 100px">
+      <b-container class="d-flex justify-content-center align-items-center">
+        <b-form-input
+          style="width: 80%"
+          type="text"
+          v-model="message"
+          placeholder="Type your message..."
+        ></b-form-input>
+        <b-button @click="sendMessage()" class="send" variant="primary"
+          >Send</b-button
+        >
+      </b-container>
     </b-row>
   </b-col>
-  <b-col xl="9" class="chatPage" v-else>
+  <b-col xl="9" lg="9" md="9" class="chatPage" v-else>
     <div class="d-flex justify-content-center chatter">
       <p class="align-self-center noChat">
         Please select a chat to start messaging
@@ -85,7 +98,8 @@
 
 <script>
 import io from 'socket.io-client'
-import { mapGetters } from 'vuex'
+import ProfileFriend from '../components/ProfileFriend'
+import { mapActions, mapGetters } from 'vuex'
 export default {
   name: 'Chat',
   props: ['startChat', 'myInfo'],
@@ -93,67 +107,98 @@ export default {
     return {
       socket: io('http://localhost:3001'),
       urlApi: process.env.VUE_APP_BASE_URL + '/',
-      username: '',
-      room: '',
+      // username: '',
+      // room: '',
       message: '',
-      messages: [],
+      oldRoom: '',
+      // messages: [],
       typing: false // false || nama si pengetik
     }
   },
-  watch: {
-    message(value) {
-      if (value) {
-        this.socket.emit('typing', { username: this.username, room: this.room })
-      } else {
-        this.socket.emit('typing', false)
-      }
-    }
+  components: {
+    ProfileFriend
   },
+  // watch: {
+  //   message(value) {
+  //     if (value) {
+  //       this.socket.emit('typing', { username: this.username, room: this.room })
+  //     } else {
+  //       this.socket.emit('typing', false)
+  //     }
+  //   }
+  // },
   mounted() {
     // proses get message axios
     // this.getChat()
     // this.username = this.$route.params.username
     // this.room = this.$route.params.room
-    this.username = this.user.user_name
-    this.room = this.myInfo.room_id
-    this.socket.emit('welcomeMessage', {
-      username: this.username,
-      room: this.room
-    })
     this.socket.on('chatMessage', (data) => {
-      this.messages.push(data)
+      this.messageInRoomchat.push(data)
     })
-    this.socket.on('typingMessage', (data) => {
-      this.typing = data
-    })
+    // this.socket.on('typingMessage', (data) => {
+    //   this.typing = data
+    // })
   },
   computed: {
     ...mapGetters({
-      user: 'setUser'
+      user: 'setUser',
+      messageInRoomchat: 'getMessageInRoomchat'
     })
   },
   methods: {
+    ...mapActions(['profileFriend', 'postMessage', 'getMessageByRoom']),
     sendMessage() {
-      //  const setData = {
-      //     username: this.username,
-      //     message: this.message
-      //   }
-      // Global == semua orang dapat melihatt
-      // Private = hanya kita saja yang dapat melihat
-      // Broadcast = semua orang dapat melihat kecuali kita
-      //   this.socket.emit('globalMessage', setData)
-      //   this.socket.emit('privateMessage', setData)
-      //   this.socket.emit('broadcastMessage', setData)
-      // ===================================================
       const setData = {
-        username: this.username,
-        message: this.message,
-        room: this.room
+        user_id: this.user.user_id,
+        friend_id: this.myInfo.friend_id,
+        roomchat_id: this.myInfo.roomchat_id,
+        msg: this.message
       }
       this.socket.emit('roomMessage', setData)
-      // bikin fungsi simpan ke database
-      this.message = ''
+      this.postMessage(setData)
+        .then((response) => {
+          this.message = ''
+        })
+        .catch((error) => {
+          console.log(error.data.msg)
+        })
+    },
+    selectRoom(data) {
+      if (this.oldRoom) {
+        // console.log('sudah pernah klik room ' + this.oldRoom);
+        // console.log('dan akan masuk ke room ' + data);
+        this.socket.emit('changeRoom', { oldRoom: this.oldRoom, newRoom: data })
+        this.oldRoom = data
+      } else {
+        // console.log('belum pernah klik room');
+        // console.log('dan akan masuk ke room ' + data);
+        this.socket.emit('welcomeMessage', {
+          room: data.roomchat_id
+        })
+        this.oldRoom = data
+      }
     }
+    // sendMessage() {
+    //   //  const setData = {
+    //   //     username: this.username,
+    //   //     message: this.message
+    //   //   }
+    //   // Global == semua orang dapat melihatt
+    //   // Private = hanya kita saja yang dapat melihat
+    //   // Broadcast = semua orang dapat melihat kecuali kita
+    //   //   this.socket.emit('globalMessage', setData)
+    //   //   this.socket.emit('privateMessage', setData)
+    //   //   this.socket.emit('broadcastMessage', setData)
+    //   // ===================================================
+    //   const setData = {
+    //     username: this.username,
+    //     message: this.message,
+    //     room: this.room
+    //   }
+    //   this.socket.emit('roomMessage', setData)
+    //   // bikin fungsi simpan ke database
+    //   this.message = ''
+    // }
   }
 }
 </script>
@@ -201,10 +246,39 @@ export default {
   grid-area: c;
 }
 
+.itemD {
+  width: auto;
+  background: transparent;
+  background-color: transparent;
+}
+
+.itemD button {
+  background-color: transparent;
+  border: transparent;
+}
+
+.itemD button img {
+  width: 20px;
+  max-width: 100%;
+  height: auto;
+}
+.friendMessage {
+  border-radius: 20px 20px 0 20px;
+  background-color: #f6be00;
+  color: white;
+}
+.friendMessage p {
+  margin-top: 16px;
+  width: 500px;
+}
 .message {
   border-radius: 20px 20px 20px 0;
   background-color: #7e98df;
   color: white;
+}
+.message p {
+  margin-top: 16px;
+  width: 500px;
 }
 
 .noChat {
@@ -212,6 +286,10 @@ export default {
   font-size: 18px;
   font-weight: bold;
   opacity: 0.4;
+}
+.send {
+  width: 10%;
+  height: 40px;
 }
 .text {
   background-color: transparent;
@@ -223,5 +301,16 @@ export default {
 .textIn img {
   max-width: 100%;
   max-height: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  .send {
+    width: 20%;
+  }
+}
+@media screen and (max-width: 320px) {
+  .send {
+    width: 30%;
+  }
 }
 </style>

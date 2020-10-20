@@ -8,7 +8,7 @@
     hide-footer
     @close="closeModal()"
   >
-    <form ref="form" @submit.prevent="showModal = false">
+    <form ref="form" @submit.prevent="handleSearch(searching)">
       <b-form-group
         label="Email"
         label-for="email-input"
@@ -18,11 +18,11 @@
           type="search"
           id="email-input"
           v-model="searching"
-          @change="handleSearch"
           required
         ></b-form-input>
       </b-form-group>
     </form>
+    <b-alert variant="danger" v-bind:show="alert">{{ showMsg }}</b-alert>
     <b-row>
       <b-col xl="4" v-for="(item, index) in users" :key="index">
         <b-card class="jpeg">
@@ -32,18 +32,11 @@
           <p>{{ item.user_name }}</p>
           <p>{{ item.user_phone }}</p>
           <b-button
-            :disabled="isDisabled(item)"
+            v-if="!isDisabled(item)"
             @click="addFriendss(item)"
             variant="primary"
             >Add Friend</b-button
           >
-          <!-- <b-button v-show="isDisabled(item)" variant="primary" disabled>
-            <b-img
-              style="max-width: 20px"
-              :src="require('../assets/check.png')"
-            >
-            </b-img>
-          </b-button> -->
         </b-card>
       </b-col>
     </b-row>
@@ -60,13 +53,11 @@ export default {
       searching: '',
       form: {
         user_email: ''
-      }
-      // isDisabled: false
+      },
+      alert: false,
+      showMsg: ''
     }
   },
-  //   created() {
-  //     this.inviteFriends()
-  //   },
   computed: {
     ...mapGetters({
       user: 'setUser',
@@ -76,17 +67,22 @@ export default {
     })
   },
   methods: {
-    ...mapActions(['inviteFriends', 'add', 'getRoom']),
+    ...mapActions(['inviteFriends', 'add', 'getRoom', 'getFriends']),
     ...mapMutations(['setSearch']),
 
     closeModal() {
       this.users.length = 0
       this.form.user_email = ''
+      this.searching = ''
+      this.alert = false
     },
     isDisabled(item, index) {
       if (this.friend) {
         for (let x in this.friend) {
-          if (this.friend[x].user_email === item.user_email) {
+          if (
+            this.friend[x].user_email === item.user_email ||
+            this.user.user_id === item.user_id
+          ) {
             return true
           }
         }
@@ -94,28 +90,28 @@ export default {
         return false
       }
     },
-    handleSearch(event) {
-      this.setSearch(event)
+    handleSearch(searching) {
+      this.setSearch(searching)
       this.inviteFriends()
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
     },
     addFriendss(data) {
-      const setData = {
-        user_id: this.user.user_id,
-        friend_id: data.user_id
+      if (data.user_id === this.user.user_id) {
+        this.alert = true
+        this.showMsg = "can't add your own contact"
+      } else {
+        const setData = {
+          user_id: this.user.user_id,
+          friend_id: data.user_id
+        }
+        this.add(setData)
+          .then((response) => {
+            this.alert = false
+            this.getFriends(this.user)
+          })
+          .catch((error) => {
+            console.log(error)
+          })
       }
-      this.add(setData)
-        .then((response) => {
-          this.handleSearch(this.email)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
     }
   }
 }

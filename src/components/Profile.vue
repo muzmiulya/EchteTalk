@@ -7,9 +7,7 @@
         </b-button>
       </div>
       <div class="flex-fill">
-        <h3 class="titleColor" style="text-align: center">
-          @{{ myId.user_name }}
-        </h3>
+        <h3 class="titleColor" style="text-align: center">Profile</h3>
       </div>
     </b-row>
     <b-row
@@ -25,16 +23,13 @@
       <div>
         <h5 style="font-weight: bold">{{ myId.user_name }}</h5>
       </div>
-      <div>
-        <h6>@{{ myId.user_name }}</h6>
-      </div>
     </b-row>
     <b-row style="padding: 20px" class="d-flex flex-column">
       <div>
         <h6 style="font-weight: bold">Email</h6>
       </div>
       <div>
-        <p>@{{ myId.user_email }}</p>
+        <p>{{ myId.user_email }}</p>
       </div>
       <div>
         <h6 style="font-weight: bold">Phone Number</h6>
@@ -52,11 +47,15 @@
       <div>
         <h6 style="font-weight: bold">Location</h6>
       </div>
+      <b-button variant="info" @click="getGeo(), (showMap = !showMap)">
+        get Location
+      </b-button>
       <GmapMap
         :center="coordinate"
         :zoom="15"
         map-type-id="terrain"
         style="width: 300px; height: 200px"
+        v-if="showMap"
       >
         <GmapMarker
           :position="coordinate"
@@ -68,9 +67,9 @@
       </GmapMap>
       -->
       <div>
-        <h5 style="font-weight: bold">Settings</h5>
+        <h6 style="font-weight: bold">Setting</h6>
       </div>
-      <div class="d-flex justify-content-start notificationSetting">
+      <!-- <div class="d-flex justify-content-start notificationSetting">
         <b-button
           class="d-flex flex-fill"
           style="background-color: transparent; color: black"
@@ -78,8 +77,7 @@
           <img rounded="circle" :src="require('../assets/Union.png')" />
           <h6 style="padding-left: 20px">Notification</h6>
         </b-button>
-      </div>
-      <br />
+      </div> -->
       <div class="d-flex justify-content-start notificationSetting">
         <b-button
           v-b-modal.updateModal
@@ -88,7 +86,7 @@
           @click="setUsers()"
         >
           <img rounded="circle" :src="require('../assets/update.png')" />
-          <h6 style="padding-left: 20px">Update</h6>
+          <h6 style="padding-left: 20px">Update Profile</h6>
         </b-button>
       </div>
       <b-modal
@@ -168,20 +166,9 @@ export default {
       coordinate: {
         lat: 0,
         lng: 0
-      }
+      },
+      showMap: false
     }
-  },
-  created() {
-    this.$getLocation()
-      .then((coordinates) => {
-        this.coordinate = {
-          lat: coordinates.lat,
-          lng: coordinates.lng
-        }
-      })
-      .catch((error) => {
-        alert(error)
-      })
   },
   computed: {
     ...mapGetters({
@@ -237,6 +224,14 @@ export default {
     handleFile(event) {
       this.form.profile_picture = event.target.files[0]
       console.log(event.target.files[0])
+    },
+    getGeo() {
+      const lat = Number(this.myId.user_lat)
+      const lng = Number(this.myId.user_lng)
+      this.coordinate = {
+        lat,
+        lng
+      }
     },
     clickMarker(position) {
       console.log('clicked')

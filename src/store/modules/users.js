@@ -3,20 +3,21 @@ import axios from 'axios'
 
 export default {
     state: {
-        // friend: [],
         myId: [],
-        otherUsers: []
+        myFriend: [],
+        otherUsers: [],
     },
     mutations: {
-        // setFriend(state, payload) {
-        //     state.friend = payload
-        // },
         setMyId(state, payload) {
             state.myId = payload
         },
+        setFriendId(state, payload) {
+            state.myFriend = payload
+        },
         setOtherUsers(state, payload) {
             state.otherUsers = payload
-        }
+        },
+
     },
     actions: {
         getUserById(context, payload) {
@@ -31,47 +32,19 @@ export default {
                     console.log(error)
                 })
         },
-        // getRoom(context, payload) {
-        //     return new Promise((resolve, reject) => {
-        //         axios
-        //             .get(
-        //                 `${process.env.VUE_APP_BASE_URL}/roomchat/chat/room/${payload.user_id}`
-        //             )
-        //             .then(response => {
-        //                 resolve(response.data)
-        //                 context.commit('setFriend', response.data.data)
-        //             })
-        //             .catch(error => {
-        //                 reject(error.response)
-        //                 console.log(error)
-        //             })
-        //     })
-
-        // },
-        // getIdByRoom(context, payload) {
-        //     axios
-        //         .get(
-        //             `${process.env.VUE_APP_BASE_URL}/roomchat/chat/room/${payload}`
-        //         )
-        //         .then(response => {
-        //             console.log(response)
-        //         })
-        //         .catch(error => {
-        //             console.log(error)
-        //         })
-        // },
-        getMessageByRoom(context, payload) {
+        profileFriend(context, payload) {
             axios
                 .get(
-                    `${process.env.VUE_APP_BASE_URL}/roomchat/chat/message/${payload}`
+                    `${process.env.VUE_APP_BASE_URL}/users/user/${payload}`
                 )
                 .then(response => {
-                    console.log(response)
+                    context.commit('setFriendId', response.data.data[0])
                 })
                 .catch(error => {
                     console.log(error)
                 })
         },
+
         updateMyUser(context, payload) {
             return new Promise((resolve, reject) => {
                 axios
@@ -89,14 +62,14 @@ export default {
         }
     },
     getters: {
-        // getFriend(state) {
-        //     return state.friend
-        // },
         getMyId(state) {
             return state.myId
         },
+        getMyFriend(state) {
+            return state.myFriend
+        },
         getOtherUser(state) {
             return state.otherUsers
-        }
+        },
     }
 }

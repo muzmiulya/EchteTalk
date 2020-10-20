@@ -66,25 +66,25 @@ export default {
       }
     }
   },
-  mounted() {
-    if (!this.$route.params.username) {
-      this.$router.push('/about')
-    }
-    // proses get message axios
-    // this.getChat()
-    this.username = this.$route.params.username
-    this.room = this.$route.params.room
-    this.socket.emit('welcomeMessage', {
-      username: this.username,
-      room: this.room
-    })
-    this.socket.on('chatMessage', (data) => {
-      this.messages.push(data)
-    })
-    this.socket.on('typingMessage', (data) => {
-      this.typing = data
-    })
-  },
+  // mounted() {
+  //   if (!this.$route.params.username) {
+  //     this.$router.push('/about')
+  //   }
+  //   // proses get message axios
+  //   // this.getChat()
+  //   this.username = this.$route.params.username
+  //   this.room = this.$route.params.room
+  //   this.socket.emit('welcomeMessage', {
+  //     username: this.username,
+  //     room: this.room
+  //   })
+  //   this.socket.on('chatMessage', (data) => {
+  //     this.messages.push(data)
+  //   })
+  //   this.socket.on('typingMessage', (data) => {
+  //     this.typing = data
+  //   })
+  // },
   methods: {
     sendMessage() {
       //  const setData = {

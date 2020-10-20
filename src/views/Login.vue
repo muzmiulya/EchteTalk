@@ -49,15 +49,6 @@
             >
               <p>Forgot password?</p>
             </router-link>
-            <!-- <b-link
-              class="d-flex justify-content-end buttonLogSign btn-block"
-              variant="light"
-              type="button"
-              @click="showForgot = !showForgot"
-              style="padding-right: 15px"
-            >
-              Forgot password?
-            </b-link> -->
           </b-row>
           <br />
           <b-button
@@ -75,7 +66,7 @@
           class="buttonLogSign btn-block"
           variant="light"
           type="button"
-          @click="isShown = !isShown"
+          @click=";(isShown = !isShown), onReset()"
           >Sign up</b-link
         >
       </b-card>
@@ -98,7 +89,7 @@
             <h3 class="titleColor">Register</h3>
           </div>
         </b-row>
-        <form>
+        <form @submit.prevent="addUser">
           <br />
           <div class="d-flex">
             <h6 style="font-weight: normal">Email</h6>
@@ -160,51 +151,6 @@
           >
         </form>
       </b-card>
-      <!-- <b-card class="align-content-center" v-show="isShown">
-        <b-alert v-bind:show="alert">{{ isMsg }}</b-alert>
-        <b-row class="d-flex">
-          <div class="buttonBack">
-            <b-button
-              v-b-tooltip.hover.top="'Back'"
-              @click="isShown = !isShown"
-              class="flex-fill backButton"
-            >
-              <img alt="Vue back" src="../assets/back.png" />
-            </b-button>
-          </div>
-          <div class="flex-fill">
-            <h3 class="titleColor">Forgot Password</h3>
-          </div>
-        </b-row>
-        <br />
-        <div class="d-flex">
-          <h6>You'll get message soon on your email</h6>
-        </div>
-        <br />
-        <form @reset.prevent="onReset">
-          <div class="d-flex">
-            <h6 style="font-weight: normal">Email</h6>
-          </div>
-          <div>
-            <b-form-input
-              type="email"
-              id="forgotEmail"
-              class="formLogin"
-              v-model="formForgot.user_email"
-              required
-            ></b-form-input>
-          </div>
-          <br />
-          <b-button
-            :disabled="isDisabled3"
-            class="btn-block"
-            variant="primary"
-            @click="onForgot()"
-            pill
-            >Send</b-button
-          >
-        </form>
-      </b-card> -->
     </div>
   </b-container>
 </template>
@@ -215,6 +161,10 @@ export default {
   name: 'Login',
   data() {
     return {
+      coordinate: {
+        lat: 0,
+        lng: 0
+      },
       form: {
         user_email: '',
         user_password: ''
@@ -234,6 +184,18 @@ export default {
       msgError: ''
     }
   },
+  created() {
+    this.$getLocation()
+      .then((coordinates) => {
+        this.coordinate = {
+          lat: coordinates.lat,
+          lng: coordinates.lng
+        }
+      })
+      .catch((error) => {
+        alert(error)
+      })
+  },
   computed: {
     isDisabled() {
       return (
@@ -249,16 +211,35 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['login', 'addUsers', 'forgot', 'activateEmail']),
+    ...mapActions(['login', 'addUsers', 'forgot', 'updateLocation']),
     onSubmit() {
       this.login(this.form)
         .then((result) => {
-          console.log(result)
+          const setData = {
+            user_id: result.user_id,
+            form: {
+              user_lat: this.coordinate.lat,
+              user_lng: this.coordinate.lng
+            }
+          }
+          this.updateLocation(setData)
+            .then((update) => {
+              this.alert = true
+              this.isMsg = update
+            })
+            .catch((errors) => {
+              this.alertError = true
+              this.msgError = errors
+            })
+          this.alert = true
+          this.isMsg = result.msg
+          this.alertError = false
           this.$router.push('/')
         })
         .catch((error) => {
           this.alertError = true
           this.msgError = error
+          this.alert = false
         })
     },
     onReset() {
@@ -281,14 +262,32 @@ export default {
       this.alertError = false
     },
     addUser() {
-      this.addUsers(this.formSignUp)
+      const setData = {
+        user_email: this.formSignUp.user_email,
+        user_password: this.formSignUp.user_password,
+        confirm_password: this.formSignUp.confirm_password,
+        user_name: this.formSignUp.user_name,
+        user_phone: this.formSignUp.user_phone,
+        user_lat: this.coordinate.lat,
+        user_lng: this.coordinate.lng
+      }
+      this.addUsers(setData)
         .then((response) => {
           this.alert = true
           this.isMsg = response.msg
+          this.alertError = false
+          this.formSignUp = {
+            user_email: '',
+            user_password: '',
+            confirm_password: '',
+            user_name: '',
+            user_phone: ''
+          }
         })
         .catch((error) => {
           this.alertError = true
           this.msgError = error.data.msg
+          this.alert = false
         })
     }
   }

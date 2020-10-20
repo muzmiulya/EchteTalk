@@ -19,18 +19,6 @@ export default {
         }
     },
     actions: {
-        // add(context, payload) {
-        //     return new Promise((resolve, reject) => {
-        //         axios
-        //             .post(`${process.env.VUE_APP_BASE_URL}/roomchat`, payload)
-        //             .then(response => {
-        //                 resolve(response.data)
-        //             })
-        //             .catch(error => {
-        //                 reject(error.response)
-        //             })
-        //     })
-        // },
         add(context, payload) {
             return new Promise((resolve, reject) => {
                 axios
@@ -55,24 +43,58 @@ export default {
                     })
                     .catch(error => {
                         reject(error.response)
-                        console.log(error)
                     })
             })
 
         },
         inviteFriends(context, payload) {
+            axios
+                .get(
+                    `${process.env.VUE_APP_BASE_URL}/users/invite?email=${context.state.email}`
+                )
+                .then(response => {
+                    context.commit('setUsers', response.data.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
+        // =============================================================delete==================================================
+        getRoomchatForDelete(context, payload) {
             return new Promise((resolve, reject) => {
                 axios
                     .get(
-                        `${process.env.VUE_APP_BASE_URL}/users/invite?email=${context.state.email}`
+                        `${process.env.VUE_APP_BASE_URL}/users/get/roomchat?user_id=${payload.user_id}&friend_id=${payload.friend_id}`
                     )
                     .then(response => {
                         resolve(response.data)
-                        context.commit('setUsers', response.data.data)
                     })
                     .catch(error => {
                         reject(error.response)
-                        console.log(error)
+                    })
+            })
+        },
+        deleteContact(context, payload) {
+            return new Promise((resolve, reject) => {
+                axios
+                    .delete(`${process.env.VUE_APP_BASE_URL}/users/delete/contact/${payload.id_friend}`)
+                    .then(response => {
+                        resolve(response.data)
+                    })
+                    .catch(error => {
+                        reject(error.response)
+                    })
+            })
+        },
+        deleteRoomchat(context, payload) {
+            return new Promise((resolve, reject) => {
+                axios
+                    .delete(`${process.env.VUE_APP_BASE_URL}/users/delete/roomchat/${payload.roomchat_id}`)
+                    .then(response => {
+                        resolve(response.data)
+                    })
+                    .catch(error => {
+                        reject(error.response)
                     })
             })
         },

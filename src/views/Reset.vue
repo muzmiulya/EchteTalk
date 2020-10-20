@@ -92,15 +92,16 @@ export default {
       this.alertError = false
     },
     onForgot() {
-      // console.log(this.formForgot.user_email)
       this.forgot(this.formForgot)
         .then((response) => {
           this.alert = true
           this.isMsg = response.msg
+          this.alertError = false
         })
         .catch((error) => {
           this.alertError = true
           this.msgError = error.data.msg
+          this.alert = false
         })
     }
   }
