@@ -32,7 +32,7 @@ EchteTalk is a chat web application build with Vue JS, EchteTalk Application are
 4. Add .env file at root folder project
 
 ```sh
-# VUE_APP_URL = https://backend-foodsie.fwdev.online
+VUE_APP_URL = https://backend-echtetalk.fwdev.online
 ```
 
 5. Type `npm run serve`
