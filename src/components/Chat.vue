@@ -51,7 +51,7 @@
               md="5"
               sm="5"
             >
-              <p>{{ value.msg }}</p>
+              <p style="width: 350px; word-wrap: break-word">{{ value.msg }}</p>
             </b-col>
           </b-container>
           <b-container v-else class="d-flex justify-content-end">
@@ -67,7 +67,7 @@
               md="5"
               sm="5"
             >
-              <p>{{ value.msg }}</p>
+              <p style="width: 350px; word-wrap: break-word">{{ value.msg }}</p>
             </b-col>
           </b-container>
         </b-row>
@@ -150,11 +150,15 @@ export default {
     sendMessage() {
       const setData = {
         user_id: this.user.user_id,
+        user_name: this.user.user_name,
         friend_id: this.myInfo.friend_id,
+        friend_name: this.myInfo.user_name,
         roomchat_id: this.myInfo.roomchat_id,
         msg: this.message
       }
+      console.log(setData)
       this.socket.emit('roomMessage', setData)
+      this.socket.emit('sendNotification', setData)
       this.postMessage(setData)
         .then((response) => {
           this.message = ''
@@ -163,19 +167,19 @@ export default {
           console.log(error.data.msg)
         })
     },
-    selectRoom(data) {
+    selectRoom(item) {
       if (this.oldRoom) {
-        // console.log('sudah pernah klik room ' + this.oldRoom);
-        // console.log('dan akan masuk ke room ' + data);
-        this.socket.emit('changeRoom', { oldRoom: this.oldRoom, newRoom: data })
-        this.oldRoom = data
+        // console.log('sudah pernah klik room ' + this.oldRoom)
+        // console.log('dan akan masuk ke room ' + item)
+        this.socket.emit('changeRoom', { oldRoom: this.oldRoom, newRoom: item })
+        this.oldRoom = item
       } else {
-        // console.log('belum pernah klik room');
-        // console.log('dan akan masuk ke room ' + data);
+        // console.log('belum pernah klik room')
+        // console.log('dan akan masuk ke room ' + item)
         this.socket.emit('welcomeMessage', {
-          room: data.roomchat_id
+          room: item.roomchat_id
         })
-        this.oldRoom = data
+        this.oldRoom = item
       }
     }
     // sendMessage() {
@@ -279,6 +283,7 @@ export default {
 .message p {
   margin-top: 16px;
   width: 500px;
+  height: auto;
 }
 
 .noChat {

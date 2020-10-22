@@ -7,9 +7,9 @@ export default {
     user: {},
     token: localStorage.getItem('token') || null,
     // users: [],
-    pagess: 1,
-    perPages: 7,
-    totallRows: null,
+    // pagess: 1,
+    // perPages: 7,
+    // totallRows: null,
     user_id: ''
   },
   mutations: {
@@ -24,12 +24,12 @@ export default {
     // setAllUser(state, payload) {
     //   state.users = payload
     // },
-    setPagess(state, payload) {
-      state.pagess = payload
-    },
-    setTotallRows(state, payload) {
-      state.totallRows = payload
-    }
+    // setPagess(state, payload) {
+    //   state.pagess = payload
+    // },
+    // setTotallRows(state, payload) {
+    //   state.totallRows = payload
+    // }
   },
   actions: {
     login(context, payload) {
@@ -91,18 +91,18 @@ export default {
           })
       })
     },
-    getAllUser(context) {
-      axios
-        .get(`${process.env.VUE_APP_BASE_URL}/users/user`)
-        .then(response => {
-          context.commit('setAllUser', response.data.data)
-          const totallRows = response.data.data.length
-          context.commit('setTotallRows', totallRows)
-        })
-        .catch(error => {
-          console.log(error)
-        })
-    },
+    // getAllUser(context) {
+    //   axios
+    //     .get(`${process.env.VUE_APP_BASE_URL}/users/user`)
+    //     .then(response => {
+    //       context.commit('setAllUser', response.data.data)
+    //       const totallRows = response.data.data.length
+    //       context.commit('setTotallRows', totallRows)
+    //     })
+    //     .catch(error => {
+    //       console.log(error)
+    //     })
+    // },
     // updateUser(context, payload) {
     //   return new Promise((resolve, reject) => {
     //     axios
@@ -198,14 +198,14 @@ export default {
     // getUsers(state) {
     //   return state.users
     // },
-    getRowses(state) {
-      return state.totallRows
-    },
-    getPerPages(state) {
-      return state.perPages
-    },
-    getPagess(state) {
-      return state.pagess
-    }
+    // getRowses(state) {
+    //   return state.totallRows
+    // },
+    // getPerPages(state) {
+    //   return state.perPages
+    // },
+    // getPagess(state) {
+    //   return state.pagess
+    // }
   }
 }

@@ -20,19 +20,16 @@ export default {
     },
     actions: {
         getAllRoomChat(context, payload) {
-            return new Promise((resolve, reject) => {
-                axios
-                    .get(
-                        `${process.env.VUE_APP_BASE_URL}/roomchat/chat/room/${payload}`
-                    )
-                    .then(response => {
-                        resolve(response.data)
-                        context.commit('setRoomchat', response.data.data)
-                    })
-                    .catch(error => {
-                        reject(error.response)
-                    })
-            })
+            axios
+                .get(
+                    `${process.env.VUE_APP_BASE_URL}/roomchat/chat/room/${payload}`
+                )
+                .then(response => {
+                    context.commit('setRoomchat', response.data.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         },
         getMessageByRoom(context, payload) {
             axios

@@ -61,7 +61,7 @@
                     <b-button
                       variant="primary"
                       v-b-tooltip.hover.top="'Logout'"
-                      @click="handleLogout"
+                      @click="closeLogout()"
                     >
                       <img alt="Vue logout" src="../assets/logout-2.png" />
                       Logout</b-button
@@ -133,6 +133,34 @@
                     pill
                     variant="danger"
                     @click="handleDelete(), $bvModal.hide('modal-delete')"
+                    >Yes</b-button
+                  >
+                </b-container>
+              </b-modal>
+              <b-modal
+                id="modal-logout"
+                hide-header
+                hide-footer
+                no-close-on-backdrop
+                no-close-on-esc
+              >
+                <b-container class="modaldelete">
+                  <div class="youSure">
+                    <h3>Are You Sure?</h3>
+                  </div>
+                  <br />
+                  <b-button
+                    class="buttonCancelDel"
+                    pill
+                    variant="warning"
+                    @click="$bvModal.hide('modal-logout')"
+                    >Cancel</b-button
+                  >
+                  <b-button
+                    class="buttonYesDel"
+                    pill
+                    variant="danger"
+                    @click="handleLogout(), $bvModal.hide('modal-logout')"
                     >Yes</b-button
                   >
                 </b-container>
@@ -281,6 +309,7 @@ export default {
         user_id: 0,
         friend_id: 0
       }
+      // oldRoom: ''
     }
   },
   components: {
@@ -323,6 +352,10 @@ export default {
     },
     closeInvite() {
       this.$root.$emit('bv::show::modal', 'modalInvite', '#btnShows')
+      this.show = false
+    },
+    closeLogout() {
+      this.$root.$emit('bv::show::modal', 'modal-logout', '#btnShow')
       this.show = false
     },
     shows() {
@@ -369,24 +402,25 @@ export default {
       }
       const select = this.$refs.selection
       select.selectRoom(item)
+      // if (this.oldRoom) {
+      //   console.log('sudah pernah klik room ' + this.oldRoom)
+      //   console.log('dan akan masuk ke room ' + item)
+      //   this.socket.emit('changeRoom', { oldRoom: this.oldRoom, newRoom: item })
+      //   this.oldRoom = item
+      // } else {
+      //   console.log('belum pernah klik room')
+      //   console.log('dan akan masuk ke room ' + item)
+      //   this.socket.emit('welcomeMessage', {
+      //     room: item.roomchat_id
+      //   })
+      //   this.oldRoom = item
+      // }
     },
     handleGetFriend() {
       this.getFriends(this.user)
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log(error.data.msg)
-        })
     },
     handleRoomChat() {
       this.getAllRoomChat(this.user.user_id)
-        .then((response) => {
-          console.log(response)
-        })
-        .catch((error) => {
-          console.log(error.data.msg)
-        })
     },
     handleNotif() {
       this.getNotification(this.user)
@@ -412,6 +446,7 @@ export default {
                 .then((response) => {
                   this.handleGetFriend()
                   this.handleRoomChat()
+                  this.startChat = false
                 })
                 .catch((error) => {
                   console.log(error)

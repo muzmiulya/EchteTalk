@@ -32,19 +32,16 @@ export default {
             })
         },
         getFriends(context, payload) {
-            return new Promise((resolve, reject) => {
-                axios
-                    .get(
-                        `${process.env.VUE_APP_BASE_URL}/users/friend/${payload.user_id}`
-                    )
-                    .then(response => {
-                        resolve(response.data)
-                        context.commit('setFriend', response.data.data)
-                    })
-                    .catch(error => {
-                        reject(error.response)
-                    })
-            })
+            axios
+                .get(
+                    `${process.env.VUE_APP_BASE_URL}/users/friend/${payload.user_id}`
+                )
+                .then(response => {
+                    context.commit('setFriend', response.data.data)
+                })
+                .catch(error => {
+                    console.log(error)
+                })
 
         },
         inviteFriends(context, payload) {
