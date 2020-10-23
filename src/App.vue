@@ -19,7 +19,7 @@ export default {
   name: 'App',
   data() {
     return {
-      socket: io('http://localhost:3001'),
+      socket: io(`${process.env.VUE_APP_BASE_URL}`),
       notification: {}
     }
   },

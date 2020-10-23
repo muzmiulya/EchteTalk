@@ -93,7 +93,7 @@ export default {
   props: ['startChat', 'myInfo'],
   data() {
     return {
-      socket: io('http://localhost:3001'),
+      socket: io(`${process.env.VUE_APP_BASE_URL}`),
       urlApi: process.env.VUE_APP_BASE_URL + '/',
       message: '',
       oldRoom: '',
