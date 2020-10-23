@@ -43,7 +43,6 @@ export default {
   mounted() {
     this.setNotification()
     this.socket.on('notification', (data) => {
-      console.log(data)
       this.notification = data
       this.$root.$emit('bv::show::toast', 'my-toast')
     })

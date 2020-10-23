@@ -232,10 +232,7 @@
                   <div class="gridbox">
                     <div class="friends">
                       <div class="item-a">
-                        <b-link
-                          type="button"
-                          @click="getRoomChat(item), getMessageByRoom(item)"
-                        >
+                        <b-link type="button" @click="getRoomChat(item)">
                           <b-img
                             alt="Vue pictures"
                             :src="urlApi + item.profile_picture"
@@ -255,9 +252,7 @@
                       </div>
                       <div
                         class="d-flex align-self-center justify-content-center item-f"
-                      >
-                        <!-- <span class="badge badge-pill badge-primary">1</span> -->
-                      </div>
+                      ></div>
                     </div>
                   </div>
                 </b-card>
@@ -309,7 +304,6 @@ export default {
         user_id: 0,
         friend_id: 0
       }
-      // oldRoom: ''
     }
   },
   components: {
@@ -338,7 +332,6 @@ export default {
     ...mapActions([
       'getFriends',
       'getUserById',
-      'getMessageByRoom',
       'postRoom',
       'getAllRoomChat',
       'getNotification',
@@ -402,19 +395,7 @@ export default {
       }
       const select = this.$refs.selection
       select.selectRoom(item)
-      // if (this.oldRoom) {
-      //   console.log('sudah pernah klik room ' + this.oldRoom)
-      //   console.log('dan akan masuk ke room ' + item)
-      //   this.socket.emit('changeRoom', { oldRoom: this.oldRoom, newRoom: item })
-      //   this.oldRoom = item
-      // } else {
-      //   console.log('belum pernah klik room')
-      //   console.log('dan akan masuk ke room ' + item)
-      //   this.socket.emit('welcomeMessage', {
-      //     room: item.roomchat_id
-      //   })
-      //   this.oldRoom = item
-      // }
+      select.getMessaging(item)
     },
     handleGetFriend() {
       this.getFriends(this.user)
@@ -465,14 +446,10 @@ export default {
 </script>
 
 <style scoped>
-/* div {
-  border: 1px solid black;
-} */
-
 .addButton {
   background-color: transparent;
   border: none;
-  height: 60px;
+  height: 50px;
   max-width: 100%;
   height: auto;
   width: 50px;
@@ -481,7 +458,7 @@ export default {
 .addButton img {
   max-width: 100%;
   max-height: 100%;
-  width: 50px;
+  width: 40px;
 }
 
 .buttonMiddle {
@@ -621,7 +598,7 @@ export default {
 }
 .searchMessage {
   max-width: 100%;
-  width: auto;
+  width: 250px;
   height: 40px;
 }
 .youSure {

@@ -23,6 +23,7 @@
       </b-form-group>
     </form>
     <b-alert variant="danger" v-bind:show="alert">{{ showMsg }}</b-alert>
+    <b-alert variant="danger" v-bind:show="alertError">{{ msgError }}</b-alert>
     <b-row>
       <b-col xl="4" v-for="(item, index) in users" :key="index">
         <b-card class="jpeg">
@@ -55,7 +56,9 @@ export default {
         user_email: ''
       },
       alert: false,
-      showMsg: ''
+      showMsg: '',
+      alertError: false,
+      msgError: ''
     }
   },
   computed: {
@@ -75,6 +78,7 @@ export default {
       this.form.user_email = ''
       this.searching = ''
       this.alert = false
+      this.alertError = false
     },
     isDisabled(item, index) {
       if (this.friend) {
@@ -109,7 +113,9 @@ export default {
             this.getFriends(this.user)
           })
           .catch((error) => {
-            console.log(error)
+            this.alertError = true
+            this.msgError = error.data.msg
+            this.alert = false
           })
       }
     }

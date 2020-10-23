@@ -49,7 +49,7 @@ export default {
             return new Promise((resolve, reject) => {
                 axios
                     .patch(
-                        `http://127.0.0.1:3001/profile/patch/${payload.user_id}`,
+                        `${process.env.VUE_APP_BASE_URL}/profile/patch/${payload.user_id}`,
                         payload.form
                     )
                     .then(response => {

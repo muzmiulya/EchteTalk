@@ -99,9 +99,6 @@ export default {
   },
   methods: {
     clickMarker(position) {
-      console.log('clicked')
-      console.log(position.latLng.lat())
-      console.log(position.latLng.lng())
       this.coordinate = {
         lat: position.latLng.lat(),
         lng: position.latLng.lng()

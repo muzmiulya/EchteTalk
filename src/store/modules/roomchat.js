@@ -4,15 +4,11 @@ import axios from 'axios'
 export default {
     state: {
         roomchat: [],
-        messageInRoomchat: [],
         notification: []
     },
     mutations: {
         setRoomchat(state, payload) {
             state.roomchat = payload
-        },
-        setMessageByRoom(state, payload) {
-            state.messageInRoomchat = payload
         },
         setNotification(state, payload) {
             state.notification = payload
@@ -32,17 +28,18 @@ export default {
                 })
         },
         getMessageByRoom(context, payload) {
-            axios
-                .get(
-                    `${process.env.VUE_APP_BASE_URL}/roomchat/chat/message/${payload.roomchat_id}`
-                )
-                .then(response => {
-                    console.log(response)
-                    context.commit('setMessageByRoom', response.data.data)
-                })
-                .catch(error => {
-                    console.log(error)
-                })
+            return new Promise((resolve, reject) => {
+                axios
+                    .get(
+                        `${process.env.VUE_APP_BASE_URL}/roomchat/chat/message/${payload.roomchat_id}`
+                    )
+                    .then(response => {
+                        resolve(response.data.data)
+                    })
+                    .catch(error => {
+                        reject(error.response)
+                    })
+            })
         },
         getNotification(context, payload) {
             axios
@@ -50,7 +47,6 @@ export default {
                     `${process.env.VUE_APP_BASE_URL}/roomchat/chat/notif/${payload.user_id}`
                 )
                 .then(response => {
-                    console.log(response)
                     context.commit('setNotification', response.data.data)
                 })
                 .catch(error => {

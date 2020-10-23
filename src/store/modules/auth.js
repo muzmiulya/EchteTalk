@@ -6,10 +6,6 @@ export default {
   state: {
     user: {},
     token: localStorage.getItem('token') || null,
-    // users: [],
-    // pagess: 1,
-    // perPages: 7,
-    // totallRows: null,
     user_id: ''
   },
   mutations: {
@@ -21,15 +17,6 @@ export default {
       state.user = {}
       state.token = null
     },
-    // setAllUser(state, payload) {
-    //   state.users = payload
-    // },
-    // setPagess(state, payload) {
-    //   state.pagess = payload
-    // },
-    // setTotallRows(state, payload) {
-    //   state.totallRows = payload
-    // }
   },
   actions: {
     login(context, payload) {
@@ -91,34 +78,6 @@ export default {
           })
       })
     },
-    // getAllUser(context) {
-    //   axios
-    //     .get(`${process.env.VUE_APP_BASE_URL}/users/user`)
-    //     .then(response => {
-    //       context.commit('setAllUser', response.data.data)
-    //       const totallRows = response.data.data.length
-    //       context.commit('setTotallRows', totallRows)
-    //     })
-    //     .catch(error => {
-    //       console.log(error)
-    //     })
-    // },
-    // updateUser(context, payload) {
-    //   return new Promise((resolve, reject) => {
-    //     axios
-    //       .patch(
-    //         `${process.env.VUE_APP_BASE_URL}/users/patch/${payload.user_id}`,
-    //         payload
-    //       )
-    //       .then(response => {
-    //         console.log(response)
-    //         resolve(response.data)
-    //       })
-    //       .catch(error => {
-    //         reject(error.response)
-    //       })
-    //   })
-    // },
     updateLocation(context, payload) {
       return new Promise((resolve, reject) => {
         axios
@@ -147,15 +106,12 @@ export default {
       })
     },
     interceptorRequest(context) {
-      console.log('interceptor Works !')
       axios.interceptors.request.use(
         function (config) {
           config.headers.authorization = `Bearer ${context.state.token}`
-          // Do something before request is sent
           return config
         },
         function (error) {
-          // Do something with request error
           return Promise.reject(error)
         }
       )
@@ -166,7 +122,6 @@ export default {
           return response
         },
         function (error) {
-          console.log(error.response)
           if (error.response.status === 403) {
             if (
               error.response.data.msg === 'invalid token' ||
@@ -194,18 +149,6 @@ export default {
     },
     setUser(state) {
       return state.user
-    },
-    // getUsers(state) {
-    //   return state.users
-    // },
-    // getRowses(state) {
-    //   return state.totallRows
-    // },
-    // getPerPages(state) {
-    //   return state.perPages
-    // },
-    // getPagess(state) {
-    //   return state.pagess
-    // }
+    }
   }
 }

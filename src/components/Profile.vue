@@ -69,15 +69,6 @@
       <div>
         <h6 style="font-weight: bold">Setting</h6>
       </div>
-      <!-- <div class="d-flex justify-content-start notificationSetting">
-        <b-button
-          class="d-flex flex-fill"
-          style="background-color: transparent; color: black"
-        >
-          <img rounded="circle" :src="require('../assets/Union.png')" />
-          <h6 style="padding-left: 20px">Notification</h6>
-        </b-button>
-      </div> -->
       <div class="d-flex justify-content-start notificationSetting">
         <b-button
           v-b-modal.updateModal
@@ -190,6 +181,7 @@ export default {
     },
     alertClose() {
       this.alert = false
+      this.alertError = false
     },
     setUsers() {
       this.form = {
@@ -214,16 +206,17 @@ export default {
         .then((response) => {
           this.alert = true
           this.msg = response.msg
+          this.alertError = false
           this.getUserById(this.user)
         })
         .catch((error) => {
           this.alertError = true
           this.msgError = error.data.msg
+          this.alert = false
         })
     },
     handleFile(event) {
       this.form.profile_picture = event.target.files[0]
-      console.log(event.target.files[0])
     },
     getGeo() {
       const lat = Number(this.myId.user_lat)
@@ -234,9 +227,6 @@ export default {
       }
     },
     clickMarker(position) {
-      console.log('clicked')
-      console.log(position.latLng.lat())
-      console.log(position.latLng.lng())
       this.coordinate = {
         lat: position.latLng.lat(),
         lng: position.latLng.lng()

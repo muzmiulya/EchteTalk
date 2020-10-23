@@ -30,20 +30,12 @@
       style="padding: 10px; height: 600px; overflow: scroll"
     >
       <b-container style="width: 100%">
-        <!-- <p v-if="typing">
-        <em>{{ typing }} is typing a message...</em>
-      </p> -->
         <b-row
-          v-for="(value, index) in messageInRoomchat"
+          v-for="(value, index) in messageInRoom"
           :key="index"
           style="margin-bottom: 10px; height: auto"
         >
           <b-container v-if="value.user_id === user.user_id">
-            <!-- <b-col xl="2" class="d-flex">
-              <p>
-            <strong>{{ value.username }}:</strong>
-          </p>
-            </b-col> -->
             <b-col
               class="d-flex align-content-center message"
               xl="5"
@@ -55,11 +47,7 @@
             </b-col>
           </b-container>
           <b-container v-else class="d-flex justify-content-end">
-            <b-col xl="2">
-              <!-- <p>
-            <strong>{{ value.username }}:</strong>
-          </p> -->
-            </b-col>
+            <b-col xl="2"> </b-col>
             <b-col
               class="d-flex align-content-center friendMessage"
               xl="5"
@@ -107,46 +95,40 @@ export default {
     return {
       socket: io('http://localhost:3001'),
       urlApi: process.env.VUE_APP_BASE_URL + '/',
-      // username: '',
-      // room: '',
       message: '',
       oldRoom: '',
-      // messages: [],
-      typing: false // false || nama si pengetik
+      messageInRoom: [],
+      typing: false
     }
   },
   components: {
     ProfileFriend
   },
-  // watch: {
-  //   message(value) {
-  //     if (value) {
-  //       this.socket.emit('typing', { username: this.username, room: this.room })
-  //     } else {
-  //       this.socket.emit('typing', false)
-  //     }
-  //   }
-  // },
   mounted() {
-    // proses get message axios
-    // this.getChat()
-    // this.username = this.$route.params.username
-    // this.room = this.$route.params.room
     this.socket.on('chatMessage', (data) => {
-      this.messageInRoomchat.push(data)
+      this.messageInRoom.push(data)
     })
-    // this.socket.on('typingMessage', (data) => {
-    //   this.typing = data
-    // })
   },
   computed: {
     ...mapGetters({
-      user: 'setUser',
-      messageInRoomchat: 'getMessageInRoomchat'
+      user: 'setUser'
     })
   },
   methods: {
     ...mapActions(['profileFriend', 'postMessage', 'getMessageByRoom']),
+    getMessaging(item) {
+      this.getMessageByRoom(item)
+        .then((response) => {
+          if (response === '') {
+            this.messageInRoom = []
+          } else {
+            this.messageInRoom = response
+          }
+        })
+        .catch((error) => {
+          console.log(error.data.msg)
+        })
+    },
     sendMessage() {
       const setData = {
         user_id: this.user.user_id,
@@ -156,7 +138,6 @@ export default {
         roomchat_id: this.myInfo.roomchat_id,
         msg: this.message
       }
-      console.log(setData)
       this.socket.emit('roomMessage', setData)
       this.socket.emit('sendNotification', setData)
       this.postMessage(setData)
@@ -169,40 +150,15 @@ export default {
     },
     selectRoom(item) {
       if (this.oldRoom) {
-        // console.log('sudah pernah klik room ' + this.oldRoom)
-        // console.log('dan akan masuk ke room ' + item)
         this.socket.emit('changeRoom', { oldRoom: this.oldRoom, newRoom: item })
         this.oldRoom = item
       } else {
-        // console.log('belum pernah klik room')
-        // console.log('dan akan masuk ke room ' + item)
         this.socket.emit('welcomeMessage', {
           room: item.roomchat_id
         })
         this.oldRoom = item
       }
     }
-    // sendMessage() {
-    //   //  const setData = {
-    //   //     username: this.username,
-    //   //     message: this.message
-    //   //   }
-    //   // Global == semua orang dapat melihatt
-    //   // Private = hanya kita saja yang dapat melihat
-    //   // Broadcast = semua orang dapat melihat kecuali kita
-    //   //   this.socket.emit('globalMessage', setData)
-    //   //   this.socket.emit('privateMessage', setData)
-    //   //   this.socket.emit('broadcastMessage', setData)
-    //   // ===================================================
-    //   const setData = {
-    //     username: this.username,
-    //     message: this.message,
-    //     room: this.room
-    //   }
-    //   this.socket.emit('roomMessage', setData)
-    //   // bikin fungsi simpan ke database
-    //   this.message = ''
-    // }
   }
 }
 </script>
